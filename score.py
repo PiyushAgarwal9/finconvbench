@@ -8,7 +8,9 @@ Usage:
 predictions.csv needs a header row and two columns:
     id                the benchmark row id (1 to 11465)
     predicted_label   one of: en, hi, hi-en, ta, ta-en, te, te-en, kn, kn-en
-                      (any other value is scored as wrong)
+                      Other values receive zero exact-label and
+                      label-in-family credit. Reply-language accuracy is
+                      scored separately.
 An optional third column, reply_language, gives the language your system
 would reply in. If it is absent, the reply language is derived from the
 predicted label (see "Reply-language accuracy" below).
