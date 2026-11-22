@@ -12,8 +12,9 @@ predictions.csv needs a header row and two columns:
                       label-in-family credit. Reply-language accuracy is
                       scored separately.
 An optional third column, reply_language, gives the language your system
-would reply in. If it is absent, the reply language is derived from the
-predicted label (see "Reply-language accuracy" below).
+would reply in. If the column is absent, the reply language is derived from
+the predicted label (see "Reply-language accuracy" below). If the column is
+present, every scored row needs a value in it.
 
 As in the paper, the 468 rows labeled `unknown` are not scored. A prediction
 is required for each of the other 10,997 rows.
@@ -103,8 +104,10 @@ def main():
     per_n, per_exact = Counter(), Counter()
     for i, g in scored.items():
         pred, rep = preds[i]
-        if not (has_reply and rep):
+        if not has_reply:
             rep = derived_reply(pred)
+        elif not rep:
+            sys.exit(f"empty reply_language for id {i}: fill every scored row or remove the column")
         per_n[g] += 1
         if pred == g:
             exact += 1

@@ -75,13 +75,13 @@ python3 score.py predictions.csv
 
 `predictions.csv` has a header row and the columns `id` and `predicted_label` (one of the nine labels above). Other values receive zero exact-label and label-in-family credit. Reply-language accuracy is scored separately. The script does not convert a tool's raw output, such as ISO language codes, into these labels. Do that mapping first; the paper describes its own mapping in Appendix B.
 
-By default the script derives the reply language from the predicted label: the label itself if it is `hi` or `hi-en`, otherwise `en`. For the baseline tools in the paper, Hindi-family predictions receive a Hindi-family reply selected by script, and other predictions receive English. The two rules can pick a different Hindi register (`hi` or `hi-en`) but always earn the same credit, so the script's default reproduces the paper's baseline reply scores. If your system chooses its own reply language, add a third column `reply_language` and the script uses it instead. FinConvLID's reply score in the paper (97.3%) is computed that way, from the reply language the system recorded at run time; it is not the default derivation.
+By default the script derives the reply language from the predicted label: the label itself if it is `hi` or `hi-en`, otherwise `en`. For the baseline tools in the paper, Hindi-family predictions receive a Hindi-family reply selected by script, and other predictions receive English. The two rules can pick a different Hindi register (`hi` or `hi-en`) but always earn the same credit, so the script's default reproduces the paper's baseline reply scores. If your system chooses its own reply language, add a third column `reply_language` and the script uses it instead; every scored row then needs a value in that column. FinConvLID's reply score in the paper (97.3%) is computed that way, from the reply language the system recorded at run time; it is not the default derivation.
 
 Part of the benchmark (its Latin-script rows) was used to train the small fastText classifier inside FinConvLID, so the paper's in-domain scores include training rows. The paper also reports a rescoring on rows with no text overlap.
 
 ## What is not included
 
-The FinConvLID implementation, its trained checkpoint and the detailed evaluation records are private and are not part of this release. `score.py` only compares labels; it contains no part of the detector.
+The FinConvLID implementation, its trained checkpoint, the baseline-mapping harness and the detailed evaluation records are private and are not part of this release. `score.py` only compares labels; it contains no part of the detector.
 
 ## License
 
