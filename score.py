@@ -18,15 +18,23 @@ is required for each of the other 10,997 rows.
 
 Metrics
     Exact-label accuracy     predicted_label equals the benchmark label.
-    Reply-language accuracy  the reply language is acceptable for the message.
-                             Hindi messages (hi, hi-en) accept a reply in hi or
-                             hi-en. All other messages accept a reply in en
-                             (the English fallback policy of the paper, under
-                             which Tamil, Telugu and Kannada users are answered
-                             in English). Derived reply language: the predicted
-                             label if it is hi or hi-en, otherwise en.
-    Label-in-family          the predicted label has the same base language as
-                             the benchmark label (ta and ta-en are one family).
+    Reply-language accuracy  the reply language is acceptable for the message
+                             (Section 3 of the paper):
+                               Hindi messages (hi, hi-en) accept hi or hi-en;
+                               Tamil, Telugu and Kannada messages accept their
+                               own language (native or romanized) or en;
+                               English messages accept en only.
+                             Derived reply language, used when no reply_language
+                             column is given: the predicted label if it is hi or
+                             hi-en, otherwise en (the English fallback policy of
+                             the paper, under which Tamil, Telugu and Kannada
+                             users are answered in English).
+    Label-in-family          the predicted label is one of the nine labels and
+                             has the same base language as the benchmark label
+                             (ta and ta-en are one family).
+
+The script does not map a tool's raw output (for example ISO codes) to these
+labels. Do that first; the paper's mapping is described in its Appendix B.
 
 Standard library only. No model and no detector code is included.
 """
@@ -36,6 +44,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+LABELS = {"en", "hi", "hi-en", "ta", "ta-en", "te", "te-en", "kn", "kn-en"}
 HINDI = {"hi", "hi-en"}
 
 
@@ -48,7 +57,15 @@ def derived_reply(pred):
 
 
 def reply_ok(gold, reply):
-    return reply in HINDI if gold in HINDI else reply == "en"
+    if gold in HINDI:
+        return reply in HINDI
+    if gold == "en":
+        return reply == "en"
+    return reply in {base(gold), base(gold) + "-en", "en"}
+
+
+def in_family(gold, pred):
+    return pred in LABELS and base(pred) == base(gold)
 
 
 def main():
@@ -91,7 +108,7 @@ def main():
             exact += 1
             per_exact[g] += 1
         reply += reply_ok(g, rep)
-        family += base(pred) == base(g)
+        family += in_family(g, pred)
 
     print(f"Scored rows: {n} (the {len(gold) - n} `unknown` rows are excluded)")
     print(f"Exact-label accuracy:     {100 * exact / n:6.2f}%  ({exact}/{n})")

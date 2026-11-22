@@ -64,8 +64,8 @@ The `-en` suffix tracks script and register, not the presence of English words. 
 The paper excludes the 468 `unknown` rows and scores the remaining 10,997.
 
 - **Exact-label accuracy:** the predicted label equals `expected_language`.
-- **Reply-language accuracy:** the language the assistant would reply in is acceptable for the message. Hindi messages (`hi`, `hi-en`) accept a reply in `hi` or `hi-en`. All other messages accept a reply in `en`. This encodes one product decision (Tamil, Telugu and Kannada users receive English replies), so the metric is relative to that policy.
-- **Label-in-family:** the predicted label has the same base language as the benchmark label (`ta` and `ta-en` are one family).
+- **Reply-language accuracy:** the language the assistant would reply in is acceptable for the message. Hindi messages (`hi`, `hi-en`) accept a reply in `hi` or `hi-en`. Tamil, Telugu and Kannada messages accept a reply in their own language (native or romanized) or in `en`. English messages accept `en` only. The assistant the paper targets replies in English to Tamil, Telugu and Kannada users, so the metric is relative to that policy.
+- **Label-in-family:** the predicted label is one of the nine labels and has the same base language as the benchmark label (`ta` and `ta-en` are one family).
 
 `score.py` computes all three. It needs Python 3 and nothing else.
 
@@ -73,7 +73,9 @@ The paper excludes the 468 `unknown` rows and scores the remaining 10,997.
 python3 score.py predictions.csv
 ```
 
-`predictions.csv` has a header row and the columns `id` and `predicted_label` (one of the nine labels above; anything else is scored as wrong). The script derives the reply language from the predicted label: the label itself if it is `hi` or `hi-en`, otherwise `en`. This is the rule the paper applies to the baseline tools. If your system chooses its own reply language, add a third column `reply_language` and the script uses it instead; FinConvLID's reply score in the paper is computed that way.
+`predictions.csv` has a header row and the columns `id` and `predicted_label` (one of the nine labels above; anything else is scored as wrong). The script does not convert a tool's raw output, such as ISO language codes, into these labels. Do that mapping first; the paper describes its own mapping in Appendix B.
+
+By default the script derives the reply language from the predicted label: the label itself if it is `hi` or `hi-en`, otherwise `en`. This is the rule the paper applies to the baseline tools. If your system chooses its own reply language, add a third column `reply_language` and the script uses it instead. FinConvLID's reply score in the paper (97.3%) is computed that way, from the reply language the system recorded at run time; it is not the default derivation.
 
 Part of the benchmark (its Latin-script rows) was used to train the small fastText classifier inside FinConvLID, so the paper's in-domain scores include training rows. The paper also reports a rescoring on rows with no text overlap.
 
